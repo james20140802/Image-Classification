@@ -7,7 +7,7 @@ def conv1x1(in_planes, out_planes, stride=1):
 
 
 def conv3x3(in_planes, out_planes, stride=1):
-    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, padding=1)
+    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride)
 
 
 class BasicBlock(nn.Module):
@@ -89,8 +89,9 @@ class ResidualBlock(nn.Module):
             identity = self.downsample(x)
 
         out += identity
+        out = self.relu(out)
 
-        return x
+        return out
 
 
 class EnsembleNet(nn.Module):
@@ -127,7 +128,6 @@ class EnsembleNet(nn.Module):
 
         self.drppout = nn.Dropout(0.4, inplace=True)
         self.fc = nn.Linear(planes[3] * 4, num_classes)
-        self.softmax = nn.LogSoftmax()
 
         self.use_max_pool = use_max_pool
         self.last_planes = planes[3]
@@ -140,8 +140,7 @@ class EnsembleNet(nn.Module):
 
         if stride != 1 or inplanes != planes:
             downsample = nn.Sequential(
-                conv1x1(inplanes, planes, stride),
-                norm_layer(planes),
+                conv1x1(inplanes, planes, stride)
             )
 
         layers = []
@@ -188,6 +187,5 @@ class EnsembleNet(nn.Module):
 
         x = self.drppout(x)
         x = self.fc(x)
-        x = self.softmax(x)
 
         return x
