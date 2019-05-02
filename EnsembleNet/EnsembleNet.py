@@ -122,15 +122,23 @@ class EnsembleNet(nn.Module):
         self.layer4c = self.layer(block, planes[2], planes[3], layers[3], 2, norm_layer)
         self.layer4d = self.layer(block, planes[2], planes[3], layers[3], 2, norm_layer)
 
-        self.norm_and_relu = self.norm_and_relu(planes[3], norm_layer)
+        self.norm_and_relu_1 = self.norm_and_relu(planes[0], norm_layer)
+        self.norm_and_relu_2 = self.norm_and_relu(planes[3], norm_layer)
 
         self.global_avg_pool = nn.AdaptiveAvgPool2d((None, None))
 
-        self.drppout = nn.Dropout(0.4, inplace=True)
+        self.dropout = nn.Dropout(0.5, inplace=True)
         self.fc = nn.Linear(planes[3] * 4, num_classes)
 
         self.use_max_pool = use_max_pool
         self.last_planes = planes[3]
+
+        for m in self.modules():
+            if isinstance(m, (nn.Conv2d, nn.Linear)):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
 
     def layer(self, block, inplanes, planes, blocks, stride=1, norm_layer=None):
         if norm_layer is None:
@@ -150,7 +158,7 @@ class EnsembleNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def norm_and_relu(self, planes, norm_layer):
+    def norm_and_relu(self, planes, norm_layer=None):
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         return nn.Sequential(
@@ -160,6 +168,7 @@ class EnsembleNet(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
+        x = self.norm_and_relu_1(x)
 
         if self.use_max_pool:
             x = self.max_pool(x)
@@ -179,13 +188,18 @@ class EnsembleNet(nn.Module):
         b1 = self.layer4c(b1)
         b2 = self.layer4d(b2)
 
+        a1 = self.norm_and_relu_2(a1)
+        a2 = self.norm_and_relu_2(a2)
+        b1 = self.norm_and_relu_2(b1)
+        b2 = self.norm_and_relu_2(b2)
+
         x = torch.cat((a1, a2, b1, b2), 0)
 
         x = self.global_avg_pool(x)
 
         x = x.view((-1, self.last_planes * 4))
 
-        x = self.drppout(x)
+        x = self.dropout(x)
         x = self.fc(x)
 
         return x
