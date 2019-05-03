@@ -95,7 +95,7 @@ class ResidualBlock(nn.Module):
 
 
 class EnsembleNet(nn.Module):
-    def __init__(self, block, layers, planes=64, num_classes=1000, norm_layer=None, use_max_pool=True):
+    def __init__(self, block, layers, planes=64, num_classes=1000, norm_layer=None):
         super(EnsembleNet, self).__init__()
 
         if norm_layer is None:
@@ -130,7 +130,6 @@ class EnsembleNet(nn.Module):
         self.dropout = nn.Dropout(0.5, inplace=True)
         self.fc = nn.Linear(planes[3] * 4, num_classes)
 
-        self.use_max_pool = use_max_pool
         self.last_planes = planes[3]
 
         for m in self.modules():
@@ -170,8 +169,7 @@ class EnsembleNet(nn.Module):
         x = self.conv1(x)
         x = self.norm_and_relu_1(x)
 
-        if self.use_max_pool:
-            x = self.max_pool(x)
+        x = self.max_pool(x)
 
         x = self.layer1(x)
 
@@ -193,7 +191,7 @@ class EnsembleNet(nn.Module):
         b1 = self.norm_and_relu_2(b1)
         b2 = self.norm_and_relu_2(b2)
 
-        x = torch.cat((a1, a2, b1, b2), 0)
+        x = torch.cat((a1, a2, b1, b2))
 
         x = self.global_avg_pool(x)
 
