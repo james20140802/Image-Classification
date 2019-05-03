@@ -103,7 +103,7 @@ class EnsembleNet(nn.Module):
 
         planes = [int(planes * 2 ** i) for i in range(4)]
 
-        self.conv1 = conv3x3(3, planes[0], 2)
+        self.conv1 = nn.Conv2d(3, planes[0], 7, 2, padding=3)
 
         self.layer1 = self.layer(block, planes[0], planes[0], layers[0], 1, norm_layer)
 
