@@ -85,3 +85,13 @@ fabric.properties
 .idea/sonarlint
 
 # End of https://www.gitignore.io/api/pycharm
+EnsembleNet/data/cifar-10-python.tar.gz
+EnsembleNet/__pycache__/EnsembleNet.cpython-36.pyc
+EnsembleNet/data/cifar-10-batches-py/data_batch_5
+EnsembleNet/data/cifar-10-batches-py/data_batch_2
+EnsembleNet/data/cifar-10-batches-py/data_batch_1
+EnsembleNet/data/cifar-10-batches-py/readme.html
+EnsembleNet/data/cifar-10-batches-py/data_batch_3
+EnsembleNet/data/cifar-10-batches-py/batches.meta
+EnsembleNet/data/cifar-10-batches-py/test_batch
+EnsembleNet/data/cifar-10-batches-py/data_batch_4
